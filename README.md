@@ -430,8 +430,8 @@ node --version
 - [ ] Audio normalization/loudness matching
 - [ ] Real-time waveform visualization
 - [ ] Additional audio filters (EQ, reverb, compression)
-- [ ] Language packs for UI
-- [ ] Dark mode
+- [X] Language packs for UI
+- [X] Dark mode
 - [ ] WebAssembly-based FFmpeg (offline mode)
 
 ## 📄 License

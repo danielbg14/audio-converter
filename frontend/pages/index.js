@@ -1,7 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import MetadataEditor from '../components/MetadataEditor';
+import { useTheme } from '../context/ThemeContext';
+import { useI18n } from '../context/I18nContext';
 
-export default function Home() {
+function Home() {
+  const { t, locale, changeLocale } = useI18n();
+  const { theme, toggleTheme } = useTheme();
+  
   const [file, setFile] = useState(null);
   const [jobId, setJobId] = useState(null);
   const [status, setStatus] = useState(null);
@@ -211,28 +216,55 @@ export default function Home() {
   const fmt = currentFormat;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-8 transition-colors">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white shadow-lg rounded-lg p-8">
-          <h1 className="text-4xl font-bold mb-2 text-gray-800">🎵 Audio Converter</h1>
-          <p className="text-gray-600 mb-6">Convert your audio to any format with full control over quality settings</p>
+        {/* Header with Theme Toggle and Language Selector */}
+        <div className="flex justify-between items-center mb-6">
+          <div></div>
+          <div className="flex gap-4">
+            {/* Language Selector */}
+            <select
+              value={locale}
+              onChange={(e) => changeLocale(e.target.value)}
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="bg">Български</option>
+            </select>
+            
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+              title={t('themeToggle')}
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-8 transition-colors">
+          <h1 className="text-4xl font-bold mb-2 text-gray-800 dark:text-white">🎵 {t('header')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{t('subtitle')}</p>
 
           <form onSubmit={upload} className="space-y-6">
             {/* File Upload Section */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border-2 border-dashed border-blue-300">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">📁 Select Audio File</label>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 p-6 rounded-lg border-2 border-dashed border-blue-300 dark:border-blue-500 transition-colors">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">📁 {t('selectFile')}</label>
               <input 
                 type="file" 
                 accept="audio/*" 
                 onChange={(e) => setFile(e.target.files[0])}
-                className="w-full"
+                className="w-full px-3 py-2 dark:bg-gray-600 dark:text-white dark:file:text-white dark:file:bg-indigo-600 accent-indigo-600"
               />
               <div className="mt-3">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">🖼 Optional Cover Art</label>
-                <input type="file" accept="image/*" onChange={(e)=>setArtworkFile(e.target.files[0])} />
-                {artworkFile && <p className="text-xs text-gray-600 mt-1">Selected artwork: {artworkFile.name}</p>}
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">🖼 {t('selectCoverArt')}</label>
+                <input type="file" accept="image/*" onChange={(e)=>setArtworkFile(e.target.files[0])} className="w-full px-3 py-2 dark:bg-gray-600 dark:text-white dark:file:text-white dark:file:bg-indigo-600 accent-indigo-600" />
+                {artworkFile && <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('selectedArtwork', { name: artworkFile.name })}</p>}
               </div>
-              {file && <p className="text-sm text-green-600 mt-2">✓ Selected: {file.name}</p>}
+              {file && <p className="text-sm text-green-600 dark:text-green-400 mt-2">✓ {t('selected', { name: file.name })}</p>}
             </div>
 
             {/* Analyze Button */}
@@ -240,53 +272,55 @@ export default function Home() {
               type="button" 
               onClick={analyzeFile} 
               disabled={!file || analyzing}
-              className="w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="w-full px-6 py-3 bg-indigo-600 dark:bg-indigo-700 text-white font-semibold rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {analyzing ? '⏳ Analyzing...' : '📊 Analyze File'}
+              {analyzing ? `⏳ ${t('analyzing')}` : `📊 ${t('analyzeButton')}`}
             </button>
 
             {/* Metadata Display */}
             {metadata && (
-              <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
-                <h3 className="font-semibold text-blue-900 mb-3">📊 Original File Information</h3>
+              <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-25 p-6 rounded-lg border-l-4 border-blue-500 dark:border-blue-400 transition-colors">
+                <h3 className="font-semibold text-blue-900 dark:text-blue-400 mb-3">📊 {t('originalFile')}</h3>
+
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-600">Format</p>
-                    <p className="font-medium">{metadata.format?.format_name || 'Unknown'}</p>
+                    <p className="text-gray-600 dark:text-gray-400">{t('format')}</p>
+
+                    <p className="font-medium text-gray-900 dark:text-white">{metadata.format?.format_name || t('unknown')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600">Duration</p>
-                    <p className="font-medium">
+                    <p className="text-gray-600 dark:text-gray-400">{t('duration')}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
                       {metadata.format?.duration 
                         ? `${Number(metadata.format.duration).toFixed(2)}s` 
-                        : 'N/A'}
+                        : t('na')}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-600">Bitrate</p>
-                    <p className="font-medium">
+                    <p className="text-gray-600 dark:text-gray-400">{t('bitRate')}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
                       {metadata.format?.bit_rate 
                         ? `${Math.round(Number(metadata.format.bit_rate)/1000)} kbps` 
-                        : 'N/A'}
+                        : t('na')}
                     </p>
                   </div>
                   {metadata.streams?.[0] && (
                     <>
                       <div>
-                        <p className="text-gray-600">Codec</p>
-                        <p className="font-medium">{metadata.streams[0].codec_name}</p>
+                        <p className="text-gray-600 dark:text-gray-400">{t('codec')}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{metadata.streams[0].codec_name}</p>
                       </div>
                       <div>
-                        <p className="text-gray-600">Sample Rate</p>
-                        <p className="font-medium">{metadata.streams[0].sample_rate || 'N/A'} Hz</p>
+                        <p className="text-gray-600 dark:text-gray-400">{t('sampleRate')}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{metadata.streams[0].sample_rate || t('na')} Hz</p>
                       </div>
                       <div>
-                        <p className="text-gray-600">Channels</p>
-                        <p className="font-medium">
+                        <p className="text-gray-600 dark:text-gray-400">{t('channels_label')}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">
                           {metadata.streams[0].channels === 1 
-                            ? 'Mono' 
+                            ? t('mono')
                             : metadata.streams[0].channels === 2 
-                            ? 'Stereo' 
+                            ? t('stereo')
                             : metadata.streams[0].channels}
                         </p>
                       </div>
@@ -302,8 +336,9 @@ export default function Home() {
             </div>
 
             {/* Format Selection */}
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">🎯 Output Format</h3>
+            <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">🎯 {t('outputFormat')}</h3>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(formats).map(([key, config]) => (
                   <button
@@ -312,22 +347,22 @@ export default function Home() {
                     onClick={() => setFormData(prev => ({ ...prev, format: key }))}
                     className={`p-4 rounded-lg border-2 transition text-left ${
                       formData.format === key
-                        ? 'border-indigo-600 bg-indigo-50'
-                        : 'border-gray-300 bg-white hover:border-indigo-400'
+                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30'
+                        : 'border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-400'
                     }`}
                   >
-                    <div className="font-semibold text-gray-900">{config.name}</div>
-                    <div className="text-xs text-gray-600 mt-1">{config.description}</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{config.name}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t(`desc_${key}`)}</div>
                     <div className="flex gap-2 mt-2">
                       <span className={`text-xs px-2 py-1 rounded ${
                         config.type === 'lossy' 
-                          ? 'bg-yellow-100 text-yellow-800' 
-                          : 'bg-green-100 text-green-800'
+                          ? 'bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-40 text-yellow-800 dark:text-yellow-200' 
+                          : 'bg-green-100 dark:bg-green-900 dark:bg-opacity-40 text-green-800 dark:text-green-200'
                       }`}>
-                        {config.type === 'lossy' ? '📉 Lossy' : '✓ Lossless'}
+                        {config.type === 'lossy' ? `📉 ${t('lossy')}` : `✓ ${t('lossless')}`}
                       </span>
-                      <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">
-                        {config.quality}
+                      <span className="text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900 dark:bg-opacity-40 text-blue-800 dark:text-blue-200">
+                        {t(`quality_${config.quality.replace(/\s+/g,'_').toLowerCase()}`)}
                       </span>
                     </div>
                   </button>
@@ -337,29 +372,29 @@ export default function Home() {
 
             {/* Format-Specific Options */}
             {fmt && (
-              <div className="bg-indigo-50 p-6 rounded-lg border-l-4 border-indigo-500">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">⚙️ Conversion Options</h3>
+              <div className="bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-25 p-6 rounded-lg border-l-4 border-indigo-500 dark:border-indigo-400 transition-colors">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">⚙️ {t('conversionOptions')}</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Bitrate (for lossy formats) */}
                   {fmt.options.bitrate && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {fmt.options.bitrate.label}
-                        <span className="text-xs text-gray-500 ml-1">({fmt.options.bitrate.unit})</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">({fmt.options.bitrate.unit})</span>
                       </label>
                       <select
                         value={formData.bitrate}
                         onChange={(e) => setFormData(prev => ({ ...prev, bitrate: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-500 rounded-lg dark:bg-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       >
-                        <option value="">Auto</option>
+                        <option value="">{t('auto')}</option>
                         {fmt.options.bitrate.values.map(br => (
                           <option key={br} value={br}>{br} {fmt.options.bitrate.unit}</option>
                         ))}
                       </select>
                       {fmt.options.bitrate.help && (
-                        <p className="text-xs text-gray-600 mt-1">💡 {fmt.options.bitrate.help}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('higherValuesHelp')}</p>
                       )}
                     </div>
                   )}
@@ -367,22 +402,22 @@ export default function Home() {
                   {/* Bit Depth (for lossless formats) */}
                   {fmt.options.bitDepth && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {fmt.options.bitDepth.label}
-                        <span className="text-xs text-gray-500 ml-1">({fmt.options.bitDepth.unit})</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">({fmt.options.bitDepth.unit})</span>
                       </label>
                       <select
                         value={formData.bitDepth}
                         onChange={(e) => setFormData(prev => ({ ...prev, bitDepth: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-500 rounded-lg dark:bg-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       >
-                        <option value="">Auto</option>
+                        <option value="">{t('auto')}</option>
                         {fmt.options.bitDepth.values.map(bd => (
                           <option key={bd} value={bd}>{bd} {fmt.options.bitDepth.unit}</option>
                         ))}
                       </select>
                       {fmt.options.bitDepth.help && (
-                        <p className="text-xs text-gray-600 mt-1">💡 {fmt.options.bitDepth.help}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">💡 {fmt.options.bitDepth.help}</p>
                       )}
                     </div>
                   )}
@@ -390,16 +425,16 @@ export default function Home() {
                   {/* Sample Rate */}
                   {fmt.options.sampleRate && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {fmt.options.sampleRate.label}
-                        <span className="text-xs text-gray-500 ml-1">({fmt.options.sampleRate.unit})</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">({fmt.options.sampleRate.unit})</span>
                       </label>
                       <select
                         value={formData.sampleRate}
                         onChange={(e) => setFormData(prev => ({ ...prev, sampleRate: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-500 rounded-lg dark:bg-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       >
-                        <option value="">Auto</option>
+                        <option value="">{t('auto')}</option>
                         {fmt.options.sampleRate.values.map(sr => (
                           <option key={sr} value={sr}>{sr} {fmt.options.sampleRate.unit}</option>
                         ))}
@@ -410,17 +445,17 @@ export default function Home() {
                   {/* Channels */}
                   {fmt.options.channels && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {fmt.options.channels.label}
                       </label>
                       <select
                         value={formData.channels}
                         onChange={(e) => setFormData(prev => ({ ...prev, channels: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-500 rounded-lg dark:bg-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       >
-                        <option value="">Auto</option>
+                        <option value="">{t('auto')}</option>
                         {fmt.options.channels.values.map(ch => (
-                          <option key={ch.value} value={ch.value}>{ch.label}</option>
+                          <option key={ch.value} value={ch.value}>{ch.value === 1 ? t('mono') : ch.value === 2 ? t('stereo') : ch.label}</option>
                         ))}
                       </select>
                     </div>
@@ -429,22 +464,22 @@ export default function Home() {
                   {/* Compression Level (for FLAC) */}
                   {fmt.options.compression && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {fmt.options.compression.label}
-                        <span className="text-xs text-gray-500 ml-1">({fmt.options.compression.unit})</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">({fmt.options.compression.unit})</span>
                       </label>
                       <select
                         value={formData.compression}
                         onChange={(e) => setFormData(prev => ({ ...prev, compression: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-500 rounded-lg dark:bg-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       >
-                        <option value="">Auto (default)</option>
+                        <option value="">{t('autoDefault')}</option>
                         {fmt.options.compression.values.map(comp => (
                           <option key={comp} value={comp}>Level {comp}</option>
                         ))}
                       </select>
                       {fmt.options.compression.help && (
-                        <p className="text-xs text-gray-600 mt-1">💡 {fmt.options.compression.help}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">💡 {fmt.options.compression.help}</p>
                       )}
                     </div>
                   )}
@@ -459,7 +494,7 @@ export default function Home() {
                     onChange={(e) => setFormData(prev => ({ ...prev, normalize: e.target.checked }))}
                     className="w-4 h-4"
                   />
-                  <label htmlFor="normalize" className="ml-2 text-sm font-medium text-gray-700">
+                  <label htmlFor="normalize" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     🔊 Normalize Audio (EBU R128 loudness normalization)
                   </label>
                 </div>
@@ -478,12 +513,13 @@ export default function Home() {
           {/* Status and Download */}
           {(status || downloadUrl) && (
             <div className="mt-8 border-t pt-6">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">📈 Conversion Status</h3>
-              <div className="bg-gray-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">📈 Conversion Status</h3>
+              <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
                 <div className="flex items-center gap-3">
                   {polling && <div className="animate-spin">⏳</div>}
-                  <p className="text-lg">
-                    <strong>Status:</strong> <span className="capitalize">{status || 'idle'}</span>
+                  <p className="text-lg text-gray-900 dark:text-white">
+                    <strong className="text-gray-800 dark:text-gray-300">Status:</strong>{' '}
+                    <span className="capitalize text-indigo-600 dark:text-indigo-300">{status || 'idle'}</span>
                   </p>
                 </div>
 
@@ -520,11 +556,11 @@ export default function Home() {
                         🖼 Download Artwork
                       </button>
                     )}
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       ⏰ File available for 5 minutes. You can download multiple times if needed.
                     </p>
-                    <div className="bg-white p-4 rounded-lg">
-                      <p className="text-sm text-gray-700 mb-2">🎧 Preview:</p>
+                    <div className="bg-white dark:bg-gray-700 p-4 rounded-lg">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">🎧 Preview:</p>
                       <audio ref={audioRef} controls src={downloadUrl} className="w-full" />
                     </div>
                   </div>
@@ -535,10 +571,12 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6 text-gray-600">
-          <p className="text-sm">Supports MP3, AAC, WAV, FLAC, OGG, Opus, ALAC, AIFF, and WMA formats</p>
+        <div className="text-center mt-6 text-gray-600 dark:text-gray-400">
+          <p className="text-sm">{t('supports')}</p>
         </div>
       </div>
     </div>
   );
 }
+
+export default Home;
